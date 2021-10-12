@@ -1,0 +1,127 @@
+<main class="container">
+  <div class="h2">Liste des Réservations</div>
+  <button data-bs-toggle="modal" data-bs-target="#modalReservations" class="btn btn-primary float-end" (click)="resetForm()">Nouvelle réservation</button>
+  <br><br>
+  <div class="row">
+    <div class="col-9">
+      <div class="input-group mb-3 clearfix">
+        <span class="input-group-text" id="basic-addon1"><i class="fa fa-search" aria-hidden="true"></i></span>
+        <input type="text" class="form-control" placeholder="Rechercher une réservation" aria-describedby="basic-addon1" [(ngModel)]="search" [ngModelOptions]="{standalone: true}">
+      </div>
+    </div>
+    <div class="col-3">
+      <button type="button" class="btn btn-primary" (click)="loadReservations()">Rechercher</button>
+    </div>
+  </div>
+
+  <table class="table table-striped table-hover">
+    <thead>
+    <tr>
+      <th>id</th>
+      <th>Client</th>
+      <th>Hotel</th>
+      <th>Date début</th>
+      <th>Date fin</th>
+      <th>Numéro chambre</th>
+      <th><i class="fa fa-cogs"></i></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let resa of reservations">
+      <td>{{ resa.id }}</td>
+      <td>{{ resa.client?.completeName }}</td>
+      <td>{{ resa.hotel?.name }}</td>
+      <td>{{ resa.startDate | date : 'medium' }}</td>
+      <td>{{ resa.endDate | date : 'medium' }}</td>
+      <td>{{ resa.roomNumber }}</td>
+      <td>
+        <a (click)="edit( resa.id )" data-bs-toggle="modal" data-bs-target="#modalReservations"><i
+          class="fa fa-edit"></i></a>
+        <a (click)="delete( resa.id )" class="ps-2"><i class="fa fa-trash"></i></a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+  <br />
+</main>
+
+<div class="modal fade" id="modalReservations" tabindex="-1" aria-labelledby="modalResaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form name="clientForm" method="POST" (submit)="submitForm()" ngNativeValidate>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalResasLabel" *ngIf="r.id == undefined">Ajouter une réservation</h5>
+          <h5 class="modal-title" id="modalResaLabel" *ngIf="r.id != undefined">Editer une réservation</h5>
+          <button type="button" #closebutton class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+          <div class="alert alert-danger" *ngIf="error">Une erreur est survenue, veuillez vérifier votre saisie </div>
+
+          <div class="mb-3">
+            <label for="client" class="form-label">Client</label>
+            <select name="client" id="client" required class="form-select" placeholder="Client" required autofocus [(ngModel)]="r.client" [compareWith]="checkClient">
+              <option [ngValue]="clients" value="">Sélectionner client</option>
+              <option *ngFor="let client of clients" [ngValue]="client">
+                {{client.completeName}}
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="hotel" class="form-label">Hotel</label>
+            <select name="hotel" id="hotel" required class="form-select" placeholder="Hotel" required autofocus [(ngModel)]="r.hotel" [compareWith]="checkHotel">
+              <option [ngValue]="hotels" value="">Sélectionner Hotel</option>
+              <option *ngFor="let hotel of hotels" [ngValue]="hotel">
+                {{hotel.name}}
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="startDate" class="form-label">Date de début</label>
+            <input type="date" class="form-control" id="startDate" name="startDate" placeholder="Date de début" required autofocus [(ngModel)]="r.startDate" [ngModelOptions]="{standalone: true}">
+          </div>
+
+          <div class="mb-3">
+            <label for="endDate" class="form-label">Date de fin</label>
+            <input type="date" class="form-control" id="endDate" name="endDate" placeholder="Date de fin" required autofocus [(ngModel)]="r.endDate" [ngModelOptions]="{standalone: true}">
+          </div>
+
+          <div class="mb-3">
+            <label for="roomNumber" class="form-label">Numéro de la chambre</label>
+            <input type="number" class="form-control" id="roomNumber" name="roomNumber" placeholder="Numéro de la chambre" required autofocus [(ngModel)]="r.roomNumber" [ngModelOptions]="{standalone: true}">
+          </div>
+
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button type="reset" class="btn btn-danger float-end">Annuler</button>
+          <button type="submit" class="btn btn-secondary" id="submitbtn">Valider</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="row">
+  <ng-container *ngFor="let resa of reservations">
+    <ng-container *ngTemplateOutlet="resaCardTemplate;context:{item:resa}"></ng-container>
+  </ng-container>
+</div>
+
+<ng-template #resaCardTemplate let-resa="item">
+  <div class="col-4 mb-3">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">{{resa.client?.completeName}}
+        </h5>
+        <p class="card-text">
+          Hotel : {{resa.hotel?.name}}
+          <br> Début : {{resa.startDate | date :'medium'}}
+          <br> Fin : {{resa.endDate | date :'medium'}}
+          <br> Chambre : {{resa.roomNumber}}
+        </p>
+      </div>
+    </div>
+  </div>
+</ng-template>
